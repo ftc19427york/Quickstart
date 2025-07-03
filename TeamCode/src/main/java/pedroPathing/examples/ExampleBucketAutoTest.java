@@ -48,16 +48,16 @@ public class ExampleBucketAutoTest extends OpMode {
      * Lets assume the Robot is facing the human player and we want to score in the bucket */
 
     /** Start Pose of our robot */
-    private final Pose startPose = new Pose(8.75, 107.75, Math.toRadians(90));
+    private final Pose startPose = new Pose(9, 109, Math.toRadians(90)); //8.75/107.75
 
     /** Scoring Pose of our robot. It is facing the submersible at a -45 degree (315 degree) angle. */
-    private final Pose scorePose = new Pose(18.5, 119.5, Math.toRadians(135));  //17.5 123 DECREASE X BY 2 AND INCREASE Y BY 2
+    private final Pose scorePose = new Pose(14.75, 120, Math.toRadians(135));  //17.5 123 DECREASE X BY 2 AND INCREASE Y BY 2 18.5/119.5
 
     /** Lowest (First) Sample from the Spike Mark */
-    private final Pose pickup1Pose = new Pose(31.5, 120, Math.toRadians(0));
+    private final Pose pickup1Pose = new Pose(31, 121, Math.toRadians(0)); //31.5/120
 
     /** Middle (Second) Sample from the Spike Mark */
-    private final Pose pickup2Pose = new Pose(31.5, 130, Math.toRadians(0));
+    private final Pose pickup2Pose = new Pose(32.5, 131.75, Math.toRadians(0));
 
     private final Pose pickupControlpPose = new Pose(22.5, 118, Math.toRadians(0));
 
@@ -98,12 +98,12 @@ public class ExampleBucketAutoTest extends OpMode {
         scorePreload = follower.pathBuilder()
                 .addPath(new BezierLine(new Point(startPose), new Point(scorePose)))
                 .setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading())
-                .addParametricCallback(0, () -> robot.setLiftPosition(3000,1))
-                .addParametricCallback(0, () ->  robot.setTiltPosition(-200, 0.5))
-                .addParametricCallback(0.7, () ->  robot.setTiltPosition(-180, 0.5))
-               // .addParametricCallback(0.9, () ->  robot.claw.setPosition(0))
-                //.setPathEndTimeoutConstraint(10)
-                .setZeroPowerAccelerationMultiplier(5)
+                .addParametricCallback(0, () -> robot.setLiftPosition(2200,1))
+                .addParametricCallback(0, () ->  robot.setTiltPosition(-300, 0.5))
+//                .addParametricCallback(0.7, () ->  robot.setTiltPosition(-180, 0.5))
+//                .addParametricCallback(0.9, () ->  robot.claw.setPosition(0))
+//                //.setPathEndTimeoutConstraint(10)
+              //  .setZeroPowerAccelerationMultiplier(1)
                 .build();
 
         /* Here is an example for Constant Interpolation
@@ -113,10 +113,11 @@ public class ExampleBucketAutoTest extends OpMode {
         grabPickup1 = follower.pathBuilder()
                 .addPath(new BezierLine(new Point(scorePose), new Point(pickup1Pose)))
                 .setLinearHeadingInterpolation(scorePose.getHeading(), pickup1Pose.getHeading())
-                .addParametricCallback(0, () -> robot.setTiltPosition(-200,0.5))
-                .addParametricCallback(0, () ->  robot.setLiftPosition(0, 1))
-                .addParametricCallback(0.5, () -> robot.setTiltPosition(100,0.5))
-                //    .setPathEndTimeoutConstraint(5)
+//                .addParametricCallback(0.8, () -> robot.setTiltPosition(400,0.9))
+//                .addParametricCallback(0.1, () ->  robot.setLiftPosition(10, 1))
+//                .addParametricCallback(0.5, () -> robot.panClaw.setPosition(0.36))
+               // .setPathEndTimeoutConstraint(0.5)
+            //    .setZeroPowerAccelerationMultiplier(1)
 
                 .build();
 
@@ -124,12 +125,19 @@ public class ExampleBucketAutoTest extends OpMode {
         scorePickup1 = follower.pathBuilder()
                 .addPath(new BezierLine(new Point(pickup1Pose), new Point(scorePose)))
                 .setLinearHeadingInterpolation(pickup1Pose.getHeading(), scorePose.getHeading())
+//                .addParametricCallback(0, () -> robot.setLiftPosition(2200,1))
+//                .addParametricCallback(0.3, () -> robot.panClaw.setPosition(0.15))
+            //    .setZeroPowerAccelerationMultiplier(1)
+
                 .build();
 
         /* This is our grabPickup2 PathChain. We are using a single path with a BezierLine, which is a straight line. */
         grabPickup2 = follower.pathBuilder()
                 .addPath(new BezierCurve(new Point(scorePose), new Point(pickupControlpPose), new Point(pickup2Pose)))
                 .setLinearHeadingInterpolation(scorePose.getHeading(), pickup2Pose.getHeading())
+              //  .addParametricCallback(0.5, () -> robot.setTiltPosition(400,0.9))
+             //   .addParametricCallback(0.1, () ->  robot.setLiftPosition(10, 1))
+             //   .addParametricCallback(0.5, () -> robot.panClaw.setPosition(0.39))
                 .build();
 
         /* This is our scorePickup2 PathChain. We are using a single path with a BezierLine, which is a straight line. */
@@ -154,114 +162,93 @@ public class ExampleBucketAutoTest extends OpMode {
         park = new Path(new BezierCurve(new Point(scorePose), /* Control Point */ new Point(parkControlPose), new Point(parkPose)));
         park.setLinearHeadingInterpolation(scorePose.getHeading(), parkPose.getHeading());
     }
-//////////////////////////////////////////////////////////////////////////////////////////////
+
     /** This switch is called continuously and runs the pathing, at certain points, it triggers the action state.
      * Everytime the switch changes case, it will reset the timer. (This is because of the setPathState() method)
      * The followPath() function sets the follower to run the specific path, but does NOT wait for it to finish before moving on. */
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-
+                if (!follower.isBusy()) {
                     follower.followPath(scorePreload, true);
-
-                actionTimer.resetTimer();
-
-//                while (!follower.isBusy()){
-//
-//
-//                }
-                //  robot.setTiltPosition(-200, 0.5);
-                //  robot.setLiftPosition(3000, 1);
-//                    actionTimer.resetTimer();
-//                    while (actionTimer.getElapsedTimeSeconds()>=5){
-//                         if (robot.lift.getCurrentPosition()>= 2999) {
-//                              robot.setTiltPosition(-250, 0.5);
-//                             if (actionTimer.getElapsedTimeSeconds()>=8){
-//                                robot.claw.setPosition(0);
-//                                actionTimer.resetTimer();
-//                                  if (actionTimer.getElapsedTimeSeconds() >= 10) {
-//                                     break;
-//                                    }
-//                              }
-//                            }
-//                    }
-                setPathState(1);
-
+                    setPathState(1);
+                }
                     break;
 
             case 1:
-             if (!follower.isBusy()){
-                 while (actionTimer.getElapsedTimeSeconds() <=3) {
-                     robot.claw.setPosition(0);
-                 }
+                if (!follower.isBusy() && !robot.lift.isBusy()) {
+                    actionTimer.resetTimer();
+                    while (actionTimer.getElapsedTimeSeconds()<=0.75) {
+                        robot.setTiltPosition(-250, 0.9);
+                        robot.claw.setPosition(0);
                 /* You could check for
                 - Follower State: "if(!follower.isBusy() {}"
                 - Time: "if(pathTimer.getElapsedTimeSeconds() > 1) {}"
                 - Robot Position: "if(follower.getPose().getX() > 36) {}"
                 */
 
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                  //  follower.followPath(grabPickup1, true);
-                    /* Score Preload */
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-
-                        follower.followPath(grabPickup1,true);
-                        setPathState(2);
-                        break;
+                        /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
+                        //  follower.followPath(grabPickup1, true);
+                        /* Score Preload */
+                        /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
+                    }
+                    follower.followPath(grabPickup1, true);
+                    setPathState(2);
                 }
+                        break;
+
             case 2:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup1Pose's position */
-                if (!follower.isBusy()) {   //set timer to pause servo
-                    /* Grab Sample */
-                    /** turns servo  **/
-                    //robot.setTiltPosition(0,0.5);
-                   // robot.setLiftPosition(0,1);
-                }
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                   // if ((!robot.tilt.isBusy()) && (actionTimer.getElapsedTimeSeconds() > 5)){
-                        follower.followPath(scorePickup1, true);
-                        //  pathTimer.resetTimer();   //reset timer so it can be ready for the next pause
-                        setPathState(3);
-                  //  }
+                if (pathTimer.getElapsedTimeSeconds()>1) {
+                    robot.setLiftPosition(10, 1);
+                    robot.panClaw.setPosition(0.36);
 
+                    setPathState(3);
+                 }
                 break;
             case 3:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(!follower.isBusy()) {
-                    /* Score Sample */
+                if (pathTimer.getElapsedTimeSeconds()>1) {
 
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(grabPickup2,true);
+                    robot.setTiltPosition(600, 0.7);
+
                     setPathState(4);
                 }
                 break;
             case 4:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
-                if(!follower.isBusy()) {
+                if (pathTimer.getElapsedTimeSeconds()>1.25) {
+                    robot.claw.setPosition(0.39);
                     /* Grab Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(scorePickup2,true);
+                  //  follower.followPath(scorePickup2,true);
+                   // follower.followPath(scorePickup1,true);
                     setPathState(5);
                 }
                 break;
             case 5:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(!follower.isBusy()) {
+                if(pathTimer.getElapsedTimeSeconds()>0.50) {
+                    robot.setTiltPosition(-300, 0.9);
+                   // robot.setLiftPosition(2200, 0.9);
+//                    robot.panClaw.setPosition(0.15);
                     /* Score Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(grabPickup3,true);
+                  //  follower.followPath(grabPickup3,true);
                     setPathState(6);
                 }
                 break;
             case 6:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup3Pose's position */
-                if(!follower.isBusy()) {
+                if(pathTimer.getElapsedTimeSeconds()>1) {
+                    robot.setLiftPosition(2200, 1);
+                    robot.panClaw.setPosition(0.15);
                     /* Grab Sample */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(scorePickup3, true);
+                //    follower.followPath(scorePickup3, true);
                     setPathState(7);
                 }
                 break;
@@ -269,21 +256,147 @@ public class ExampleBucketAutoTest extends OpMode {
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if(!follower.isBusy()) {
                     /* Score Sample */
+                    follower.followPath(scorePickup1,true);
+
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are parked */
-                    follower.followPath(park,true);
+                 //   follower.followPath(park,true);
                     setPathState(8);
                 }
                 break;
             case 8:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if(!follower.isBusy()) {
+                  robot.setTiltPosition(-240, 0.9);
+                    /* Level 1 Ascent */
+
+                    /* Set the state to a Case we won't use or define, so it just stops running an new paths */
+                    setPathState(9);
+                }
+                break;
+            case 9:
+                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
+                if (pathTimer.getElapsedTimeSeconds()>.75) {
+                    robot.claw.setPosition(0);
+
+                    /* Level 1 Ascent */
+
+                    /* Set the state to a Case we won't use or define, so it just stops running an new paths */
+                    setPathState(10);
+                }
+                break;
+            case 10: //case 10 - 18
+                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
+                if (pathTimer.getElapsedTimeSeconds()>1) {
+                    robot.setLiftPosition(10,1);
+
+                    /* Level 1 Ascent */
+
+                    /* Set the state to a Case we won't use or define, so it just stops running an new paths */
+                    setPathState(11);
+                }
+                break;
+            case 11:
+                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
+                if(!follower.isBusy()) {
+                    /* Level 1 Ascent */
+                    follower.followPath(grabPickup2,true);
+                    /* Set the state to a Case we won't use or define, so it just stops running an new paths */
+                    setPathState(12);
+                }
+                break;
+            case 12:
+                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
+                if(!follower.isBusy()) {
+                    /* Level 1 Ascent */
+
+                        robot.setTiltPosition(600, 0.7);
+                    /* Set the state to a Case we won't use or define, so it just stops running an new paths */
+                    setPathState(13);
+                }
+                break;
+
+            case 13:
+                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
+                if (pathTimer.getElapsedTimeSeconds()>1.25) {
+                    robot.claw.setPosition(0.39);
+                    /* Grab Sample */
+
+                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
+                    //  follower.followPath(scorePickup2,true);
+                    // follower.followPath(scorePickup1,true);
+                    setPathState(14);
+                }
+                break;
+            case 14:
+                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
+                if(pathTimer.getElapsedTimeSeconds()>0.50) {
+                    robot.setTiltPosition(-300, 0.9);
+                    // robot.setLiftPosition(2200, 0.9);
+//                    robot.panClaw.setPosition(0.15);
+                    /* Score Sample */
+
+                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
+                    //  follower.followPath(grabPickup3,true);
+                    setPathState(15);
+                }
+                break;
+            case 15:
+                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup3Pose's position */
+                if(pathTimer.getElapsedTimeSeconds()>1) {
+                    robot.setLiftPosition(2200, 1);
+                    robot.panClaw.setPosition(0.15);
+                    /* Grab Sample */
+
+                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
+                    //    follower.followPath(scorePickup3, true);
+                    setPathState(16);
+                }
+                break;
+            case 16:
+                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
+                if(!follower.isBusy()) {
+                    /* Score Sample */
+                    follower.followPath(scorePickup2,true);
+
+
+                    /* Since this is a pathChain, we can have Pedro hold the end point while we are parked */
+                    //   follower.followPath(park,true);
+                    setPathState(17);
+                }
+                break;
+            case 17:
+                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
+                if(!follower.isBusy()) {
+                    robot.setTiltPosition(-240, 0.9);
+                    /* Level 1 Ascent */
+
+                    /* Set the state to a Case we won't use or define, so it just stops running an new paths */
+                    setPathState(18);
+                }
+                break;
+            case 18:
+                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
+                if (pathTimer.getElapsedTimeSeconds()>.75) {
+                    robot.claw.setPosition(0);
+                    /* Level 1 Ascent */
+
+                    /* Set the state to a Case we won't use or define, so it just stops running an new paths */
+                    setPathState(19);
+                }
+                break;
+            case 19: //case 11 - 18
+                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
+                if (pathTimer.getElapsedTimeSeconds()>1) {
+                    robot.setLiftPosition(5,1);
+
                     /* Level 1 Ascent */
 
                     /* Set the state to a Case we won't use or define, so it just stops running an new paths */
                     setPathState(-1);
                 }
                 break;
+
         }
     }
 
@@ -310,7 +423,9 @@ public class ExampleBucketAutoTest extends OpMode {
         telemetry.addData("Action Timer", actionTimer.getElapsedTimeSeconds());
         telemetry.addData("Tilt Position", robot.tilt.getCurrentPosition());
         telemetry.addData("Lift Position", robot.lift.getCurrentPosition());
-        telemetry.addData("Claw Position", robot.claw.getPosition());
+        telemetry.addData("Claw Position", robot.claw.getPosition());  //Open/close claw
+        telemetry.addData("Twist Position", robot.twistClaw.getPosition());  //Twist purple claw
+        telemetry.addData("Pan Position", robot.panClaw.getPosition());  //Paw the entire claw
 
         telemetry.update();
     }

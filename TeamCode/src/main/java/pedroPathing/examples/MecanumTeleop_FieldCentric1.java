@@ -23,12 +23,12 @@ public class MecanumTeleop_FieldCentric1 extends LinearOpMode {
 
 
     OldHardwareMecanum robot = new OldHardwareMecanum();   // Use a Mecanum's hardware
-    double panPosition = HardwareMecanum.panARM_HOME;  // servo's position
+    double panPosition = OldHardwareMecanum.panARM_HOME;  // servo's position
     final double droneARM_SPEED = 0.10;  // set rate to move servo
-    double twistPosition = HardwareMecanum.twistClawARM_HOME;  // servo's position
+    double twistPosition = OldHardwareMecanum.twistClawARM_HOME;  // servo's position
     final double twistARM_SPEED = 0.005;  // set rate to move servo
 
-    double clawPosition = HardwareMecanum.clawARM_HOME;  // servo's position
+    double clawPosition = OldHardwareMecanum.clawARM_HOME;  // servo's position
     final double clawARM_SPEED = 0.005;  // set rate to move servo
 
     static final double COUNTS_PER_MOTOR_REV = 537.7;   // eg: GoBILDA 312 RPM Yellow Jacket
@@ -164,7 +164,6 @@ public class MecanumTeleop_FieldCentric1 extends LinearOpMode {
             //twist
             if (gamepad2.dpad_up) {
                 robot.twistClaw.setPosition(0.30);  //this code here actually sets the position of the servo so it moves
-
             } else if (gamepad2.left_bumper) {
                 robot.twistClaw.setPosition(0);
             } else if (gamepad2.dpad_down) {

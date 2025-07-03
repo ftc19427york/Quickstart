@@ -33,6 +33,7 @@ import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.tel
 
 //import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -45,7 +46,7 @@ public class HardwareMecanum {
     //Giving names to each device
     public DcMotor lift = null;
     public DcMotor tilt = null;
-    public Servo pan = null;
+    public Servo panClaw = null;
     public Servo claw = null;
     public Servo twistClaw = null;
 
@@ -55,9 +56,16 @@ public class HardwareMecanum {
     //  public RevColorSensorV3 colorSensor = null;
 
    //Defining the servo starting positions
-    public final static double panARM_HOME = 0.75; // Starting point for Servo Arm 0.75
-    public final static double clawARM_HOME = 0.37; // Starting point for Servo Arm
-    public final static double twistClawARM_HOME = 0.15; // 0.6 Starting point for Servo Arm **twisting of the entire claw assembly
+    public final static double panClawARM_HOME = 0.15; // Starting point for Servo Arm 0.75
+    public final static double clawARM_HOME = 0.39; // Starting point for Servo Arm
+    public final static double twistClawARM_HOME = 0.75; // 0.6 Starting point for Servo Arm **twisting of the entire claw assembly
+    double panPosition = panClawARM_HOME;  // servo's position
+    final double panARM_SPEED = 0.10;  // set rate to move servo
+    double twistPosition = twistClawARM_HOME;  // servo's position
+    final double twistARM_SPEED = 0.005;  // set rate to move servo
+
+    double clawPosition = clawARM_HOME;  // servo's position
+    final double clawARM_SPEED = 0.005;  // set rate to move servo
 
     //HardwareMap hwMap = null;
 
@@ -69,7 +77,7 @@ public class HardwareMecanum {
         tilt = hwMap.get(DcMotor.class, "motor5");
         twistClaw = hwMap.servo.get("servo"); // set equal to name of the servo motor in DS
         claw = hwMap.servo.get("servo1");
-        pan = hwMap.servo.get("servo2");
+        panClaw = hwMap.servo.get("servo2");
 
         lift.setDirection(DcMotor.Direction.FORWARD);// motor4
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -86,17 +94,19 @@ public class HardwareMecanum {
       //  setTiltPosition(100, 1);
 
         //Initialize servo starting positions
-        pan.setPosition(panARM_HOME); //setPosition sets the servo's position and moves it.
+        panClaw.setPosition(panClawARM_HOME); //setPosition sets the servo's position and moves it.
         claw.setPosition(clawARM_HOME); //setPosition are defined above.
         twistClaw.setPosition(twistClawARM_HOME);
     }
     //Functions to set motor starting positions
     public void setLiftPosition(int position, double power) {
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lift.setTargetPosition(position);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift.setPower(power);
     }
     public void setTiltPosition(int position, double power) {
+        tilt.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         tilt.setTargetPosition(position);
         tilt.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         tilt.setPower(power);
